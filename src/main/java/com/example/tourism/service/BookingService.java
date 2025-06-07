@@ -31,25 +31,50 @@ public class BookingService {
     }
 
     @Transactional
-    public Booking createBooking(Long tourId, String username, Integer numberOfPeople) {
-        User user = userRepository.findByUsername(username)
+    public Booking createBooking(Long userId, Long tourId, int numberOfPeople) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new RuntimeException("Тур не найден"));
 
-        if (numberOfPeople > tour.getMaxParticipants()) {
-            throw new RuntimeException("Превышено максимальное количество участников");
-        }
-
         Booking booking = new Booking();
-        booking.setTour(tour);
         booking.setUser(user);
-        booking.setBookingDate(LocalDate.now());
+        booking.setTour(tour);
         booking.setNumberOfPeople(numberOfPeople);
+        booking.setBookingDate(LocalDate.now());
         booking.setTotalPrice(tour.getPrice().multiply(BigDecimal.valueOf(numberOfPeople)));
-        booking.setStatus("Забронировано");
 
         return bookingRepository.save(booking);
+    }
+
+    @Transactional
+    public Booking updateBooking(Long id, Long userId, Long tourId, int numberOfPeople) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Бронирование не найдено"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        Tour tour = tourRepository.findById(tourId)
+                .orElseThrow(() -> new RuntimeException("Тур не найден"));
+
+        booking.setUser(user);
+        booking.setTour(tour);
+        booking.setNumberOfPeople(numberOfPeople);
+        booking.setTotalPrice(tour.getPrice().multiply(BigDecimal.valueOf(numberOfPeople)));
+
+        return bookingRepository.save(booking);
+    }
+
+    @Transactional
+    public void deleteBooking(Long id) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Бронирование не найдено"));
+        bookingRepository.delete(booking);
+    }
+
+    public List<Booking> getBookingsByUser(User user) {
+        return bookingRepository.findByUserId(user.getId());
     }
 } 

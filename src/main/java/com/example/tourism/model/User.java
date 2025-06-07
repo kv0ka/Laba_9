@@ -28,6 +28,9 @@ public class User {
     @Column(nullable = false)
     private boolean active = true;
 
+    @Column(nullable = false)
+    private boolean deleted = false;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -68,6 +71,10 @@ public class User {
         return active;
     }
 
+    public boolean isDeleted() {
+        return deleted;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -103,6 +110,10 @@ public class User {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {

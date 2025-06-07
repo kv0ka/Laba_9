@@ -1,8 +1,9 @@
 package com.example.tourism.controller;
 
-import com.example.tourism.model.Booking;
+import com.example.tourism.model.User;
 import com.example.tourism.service.BookingService;
 import com.example.tourism.service.TourService;
+import com.example.tourism.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,9 @@ public class TourController {
     @Autowired
     private BookingService bookingService;
 
+    @Autowired
+    private UserService userService;
+
     @GetMapping
     public String getAllTours(Model model) {
         model.addAttribute("tours", tourService.getAllTours());
@@ -32,9 +36,11 @@ public class TourController {
                           Authentication authentication,
                           RedirectAttributes redirectAttributes) {
         try {
-            // Используем email пользователя как идентификатор клиента
-            String userEmail = authentication.getName();
-            bookingService.createBooking(tourId, userEmail, numberOfPeople);
+            String username = authentication.getName();
+            User user = userService.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+            
+            bookingService.createBooking(user.getId(), tourId, numberOfPeople);
             redirectAttributes.addFlashAttribute("success", "Тур успешно забронирован!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Ошибка при бронировании: " + e.getMessage());
